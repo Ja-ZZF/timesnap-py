@@ -2,6 +2,8 @@ from fastapi import FastAPI, Body, HTTPException
 from pydantic import BaseModel
 from typing import List
 
+from traits.trait_types import false
+
 from services.get_posts_by_user_interest_tags import get_recommended_posts
 from services.keyword_extractor import extract_keywords
 from services.user_interest import calculate_user_interest_tags
@@ -19,6 +21,7 @@ class UserInterestRequest(BaseModel):
 class RecommendPostsRequest(BaseModel):
     user_id: int
     num_posts: int = 20
+    is_video:bool = False
 
 @app.post("/extract_keywords")
 def get_keywords(req: ExtractRequest):
@@ -38,7 +41,7 @@ def get_user_interest_tags(req: UserInterestRequest):
 @app.post("/recommend_posts")
 def recommend_posts(req: RecommendPostsRequest):
     print("Received request:", req)
-    posts = get_recommended_posts(req.user_id, req.num_posts)
+    posts = get_recommended_posts(req.user_id, req.num_posts,req.is_video)
     if not posts:
         raise HTTPException(status_code=404, detail="No recommended posts found")
     return {"user_id": req.user_id, "recommended_post_ids": posts}
